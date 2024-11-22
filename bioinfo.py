@@ -1,5 +1,6 @@
 import blosum as blo
-
+from Bio import pairwise2
+#from Bio.SubsMat.MatrixInfo import blosum62
 global matrix
 matrix = blo.BLOSUM(62)
 
@@ -27,15 +28,48 @@ def calc_score(seq1, seq2, gapp):
             elif index_of_max == 2:
                 where = "I"
             matrix_score[i].append([max_value, where])
-        while (i >= 0 and j >= 0):
-
-    return matrix_score
+    target = ""
+    alignment = ""
+    query = ""
+    i = len(seq2)
+    j = len(seq1)
+    while (i >= 1 and j >= 1):
+        if matrix_score[i][j][1] == "I":
+            target = seq1[j-1] + target
+            alignment = "-" + alignment
+            query = "-" + query
+            j-=1
+        elif matrix_score[i][j][1] == "D":
+            target = "-" + target
+            alignment = "-" + alignment
+            query = seq2[i-1] + query
+            i-=1
+        else:
+            target = seq1[j-1] + target
+            if seq1[j-1] == seq2[i-1]:
+                alignment = "|" + alignment
+            else:
+                alignment = "." + alignment
+            query = seq2[i-1] + query
+            j-=1
+            i-=1
+    return matrix_score[len(seq2)][len(seq1)][0], "".join("target  0", target, len(seq1), "        0", len(seq2), alignment, len(alignment), "query   0",query, len(seq2))
 
 
 """seq1 = input().split()[2]
 seq2 = input().split()[2]
-gap_pen = int(input().split()[2])"""
+gap_pen = int(input().split()[2])
 
 for row in calc_score("PTTEINS", "PRTWPSEIN", -1):
-    print(" ".join(f"{value[0]:>5}" for value in row))
+    print(" ".join(f"{value[0]:>5}" for value in row))"""
+seq1 = "PTTEINS"
+seq2 = "PRTWPSEIN"
+score, target, alignment, query = calc_score(seq1, seq2, -1)
+print(score)
+print("target  0",target, len(seq1))
+print("        0", alignment, len(alignment))
+print("query   0",query, len(seq2))
+
+#alignments = pairwise2.align.globalds(seq1, seq2, blosum62, -1, -1)
+#print(alignments)
 
